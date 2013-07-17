@@ -14,7 +14,7 @@ There are three types of scan: quick, full and custom (ssdeep is used in full an
 
 How can I contact you for more information?
 -------------------------------------------
-You can contact me using the contact page at: http://fastlink2.com/contact.htm
+You can contact me using marius.mailat (at) gmail.com
 
 How can I contribute?
 ---------------------
@@ -29,7 +29,7 @@ How can I contribute?
 License?
 ---------------------
 
-Copyright (C) 2013 Marius Mailat http://fastlink2.com/contact.htm
+Copyright (C) 2013 Marius Mailat
  
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
