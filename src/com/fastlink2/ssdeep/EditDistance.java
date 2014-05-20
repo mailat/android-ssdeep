@@ -26,6 +26,9 @@ package com.fastlink2.ssdeep;
  * 
  */
 
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+
 public class EditDistance {
 	private static final int MIN_DIST = 100;
 
@@ -41,43 +44,14 @@ public class EditDistance {
 	private static final int STRLENTHRESHOLD = ((int) ((THRESHOLD
 			/ (Integer.SIZE / 8) - 3) / 2));
 
-	// #define SAFE_ASSIGN(x,y) (((x) != NULL) ? (*(x) = (y)) : (y))
-	// #define swap_int(x,y) (_iswap = (x), (x) = (y), (y) = _iswap)
-	private static void swap_int(int[] x, int[] y) {
-		int _iswap = x[0];
-		x[0] = y[0];
-		y[0] = _iswap;
-	}
-
-	// #define swap_char(x,y) (_cswap = (x), (x) = (y), (y) = _cswap)
-	private static void swap_char(/* ref */byte[][] x, /* ref */byte[][] y) {
-		byte[] _cswap = (x[0]);
-		(x[0]) = (y[0]);
-		(y[0]) = _cswap;
-	}
-
 	// #define min3(x,y,z) (_mx = (x), _my = (y), _mz = (z), (_mx < _my ? (_mx <
 	// _mz ? _mx : _mz) : (_mz < _my) ? _mz : _my))
 	private static int min3(int x, int y, int z) {
-		int _mx = (x);
-		int _my = (y);
-		int _mz = (z);
-		return (_mx < _my ? (_mx < _mz ? _mx : _mz) : (_mz < _my) ? _mz : _my);
-	}
-
-	// #define min2(x,y) (_mx = (x), _my = (y), (_mx < _my ? _mx : _my))
-	private static int min2(int x, int y) {
-		int _mx = (x);
-		int _my = (y);
-		return (_mx < _my ? _mx : _my);
+		return min(min(x, y), z);
 	}
 
 	static int insert_cost = 1;
 	static int delete_cost = 1;
-
-	static int _iswap; //swap_int temp variable
-	static char _cswap; //swap_char temp variable
-	static int _mx, _my, _mz; //min2, min3 temp variables
 
 	static int row, col, index = 0; //dynamic programming counters
 	static int radix; //radix for modular indexing
@@ -151,16 +125,7 @@ public class EditDistance {
 
 		 // Make from short enough to fit in the static storage, if it's at all possible
 		if (from_len > to_len && from_len > STRLENTHRESHOLD) {
-			int[] x = new int[1];
-			int[] y = new int[1];
-			x[0] = from_len;
-			y[0] = to_len;
-			swap_int(x, y);
-			byte[][] xx = new byte[1][];
-			byte[][] yy = new byte[1][];
-			xx[0] = from;
-			yy[0] = to;
-			swap_char(xx, yy);
+			return edit_distn(to, to_len, from, from_len);
 		}
 
 		// allocate the array storage (from the heap if necessary)
@@ -195,6 +160,8 @@ public class EditDistance {
 		 * performed. So we use 2 * from_len + 3 elements in the buffer.
 		 */
 
+		index = 0;
+
 		// /#define ar(x,y,index) (((x) == 0) ? (y) * del : (((y) == 0) ? (x) *
 		// ins :
 		// \ buffer[mod(index)]))
@@ -203,7 +170,7 @@ public class EditDistance {
 		// /#define W(x,y) ar(x, y, index + radix - 1)
 		// /#define NNWW(x,y) ar(x, y, index + 1)
 		// /#define mod(x) ((x) % radix)
-		buffer[index++] = min2(ins + del, (from[0] == to[0] ? 0 : ch));
+		buffer[index++] = min(ins + del, (from[0] == to[0] ? 0 : ch));
 
 		low = buffer[mod(index + radix - 1)];
 		for (col = 1; col < from_len; col++) {
@@ -224,7 +191,7 @@ public class EditDistance {
 
 				if (from[col] == to[row - 1] && col > 0
 						&& from[col - 1] == to[row]) {
-					buffer[index] = min2(buffer[index], NNWW(row - 1, col - 1)
+					buffer[index] = min(buffer[index], NNWW(row - 1, col - 1)
 							+ swap_cost);
 				}
 
